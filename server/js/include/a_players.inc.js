@@ -1370,6 +1370,7 @@ function GetAnimationName(index, len1, len2)
 {
 	len1 = typeof len1 === 'undefined' ? 256 : len1;
 	len2 = typeof len2 === 'undefined' ? 256 : len2;
+
 	let out = CallNativeGDK("GetAnimationName", "iSiSi", index, len1, len2);
 	return {animlib: out[0], animname: out[1]};
 }

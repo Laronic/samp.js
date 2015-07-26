@@ -795,6 +795,7 @@ function GetDynamicObjectMaterial(objectid, materialindex, maxtxdname, maxtextur
 {
 	maxtxdname = typeof maxtxdname === 'undefined' ? 256 : maxtxdname;
 	maxtexturename = typeof maxtexturename === 'undefined' ? 256 : maxtexturename;
+
 	let out = CallNativeGDK("GetDynamicObjectMaterial", "iiISSIii", objectid, materialindex, maxtxdname, maxtexturename);
 	return {modelid: out[0], txdname: out[1], texturename: out[2], materialcolor: out[3]};
 }
@@ -840,6 +841,7 @@ function GetDynamicObjectMaterialText(objectid, materialindex, maxtext, maxfontf
 {
 	maxtext = typeof maxtext === 'undefined' ? 256 : maxtext;
 	maxfontface = typeof maxfontface === 'undefined' ? 256 : maxfontface;
+
 	let out = CallNativeGDK("GetDynamicObjectMaterialText", "iiSISIIIIIii", objectid, materialindex, maxtext, maxfontface);
 	return {text: out[0], materialsize: out[1], fontface: out[2], fontsize: out[3], bold: out[4], fontcolor: out[5], backcolor: out[6], textalignment: out[7]};
 }

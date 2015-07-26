@@ -83,11 +83,11 @@ function getData(arr, opts, cb)
 						type: 'i',
 						variadic: false,
 						fullType: '',
-						default: paramArr.join('=').trim() || undefined
+						defaultValue: paramArr.join('=').trim() || ''
 					}
 				;
 				
-				if(match = (paramData.default || '').match(/sizeof\s*\(?\s*(\w*)\s*\)?/) || /(^len|_len)/.test(param))
+				if(match = paramData.defaultValue.match(/sizeof\s*\(?\s*(\w*)\s*\)?/) || /(^len|_len)/.test(param))
 				{
 					if(typeof match[1] !== 'undefined') //Found sizeof value?
 					{
@@ -96,7 +96,7 @@ function getData(arr, opts, cb)
 						}
 					}
 					else data.natives[functionName][Object.keys(data.natives[functionName]).pop()].reference = true; //Hmm, arg contains "len or *_len". /me sets parent arg to a reference
-					paramData.default = '256'; //Set all sizeof/len to this value
+					paramData.defaultValue = '256'; //Set all sizeof/len to this value
 				}							
 				if(param.charAt(0) == '&') //reference
 				{
@@ -123,8 +123,8 @@ function getData(arr, opts, cb)
 				if(param == 'function') { //"function" is a reserved keyword in javascript
 					param = 'func';
 				}
-				if(match = (paramData.default || '').match(/^{(.*)}/)) { //Check if default value contains array
-					paramData.default = '[' + match[1].trim() + ']'; //Change it to js array (right???)
+				if(match = paramData.defaultValue.match(/^{(.*)}/)) { //Check if default value contains array
+					paramData.defaultValue = '[' + match[1].trim() + ']'; //Change it to js array (right???)
 				}
 				if(!/^([A-Z].*[XYZ]$|([a-z]|sz)[A-Z])/.test(param)) { //Beauty touches! (Check if param dont match: fDuck, FromX)
 					param = param.slice(0, 2).toLowerCase() + param.substr(2); //Set the two first letters to lower-case (x, y, z, rx, ry...)
@@ -213,10 +213,10 @@ function formatFunctions(data)
 			types += paramData.type;
 			!paramData.variadic && params.push(param);
 			
-			if(typeof paramData.default !== 'undefined')
+			if(paramData.defaultValue.length)
 			{
-				tmp_comment += '[' + param + '=' + paramData.default + ']';
-				optionals.push(param + " = typeof " + param + " === 'undefined' ? " + paramData.default + " : " + param + ";");
+				tmp_comment += '[' + param + '=' + paramData.defaultValue + ']';
+				optionals.push(param + " = typeof " + param + " === 'undefined' ? " + paramData.defaultValue + " : " + param + ";");
 			}
 			else tmp_comment += paramData.variadic ? '... (Not sure how to deal with this yet)' : param;
 			comments.push(tmp_comment);
@@ -238,6 +238,7 @@ function formatFunctions(data)
 				objectReturn = [],
 				tmp_comment = [];
 			;
+			optionals.length >= 2 && (func += '\n');
 			func += '\tlet out = ' + CallNativeGDK;
 			
 			for(var i = 0, len = returnArray.length; i < len; i++)
