@@ -226,7 +226,7 @@ function GameTextForPlayer(playerid, string, time, style) {
  * @param {Number} interval
  * @param {Number} repeating
  * @param {String} format
- * @param {Mixed} ... (Not sure how to deal with this yet)
+ * @param {Mixed} ...
  * @return {Number} retval
  */
 function SetTimerEx(funcname, interval, repeating, format) {
@@ -266,7 +266,7 @@ function GetMaxPlayers() {
  * @see https://wiki.sa-mp.com/wiki/CallRemoteFunction
  * @param {String} func
  * @param {String} format
- * @param {Mixed} ... (Not sure how to deal with this yet)
+ * @param {Mixed} ...
  * @return {Number} retval
  */
 function CallRemoteFunction(func, format) {
@@ -278,7 +278,7 @@ function CallRemoteFunction(func, format) {
  * @see https://wiki.sa-mp.com/wiki/CallLocalFunction
  * @param {String} func
  * @param {String} format
- * @param {Mixed} ... (Not sure how to deal with this yet)
+ * @param {Mixed} ...
  * @return {Number} retval
  */
 function CallLocalFunction(func, format) {

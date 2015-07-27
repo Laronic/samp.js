@@ -1,15 +1,16 @@
 /** 
  * @help
- * Create a directory:
+ * Create this dir tree:
+ *
  * |-# your_directory
  *    |-# includes
  *    | |- a_samp.inc
  *    | |- a_player.inc
  *    | |- anything.inc
  *    |-# converted
- *    |- le_converter.js
+ *    |- alt_converter.js
  *
- * cd to your_directory and run the node command: node le_converter.js
+ * cd to your_directory and run the node command: node alt_converter.js
  */
 var fs = require('fs');
 
@@ -17,9 +18,9 @@ fs.readdir('includes', function(err, files)
 {
 	var 
 		ignore = [
+			'format', 
 			'print', 
 			'printf', 
-			'format', 
 			'asin', 
 			'acos', 
 			'atan', 
@@ -94,7 +95,12 @@ function getData(arr, ignoreArr, cb)
 					}
 					else data.natives[functionName][Object.keys(data.natives[functionName]).pop()].reference = true; //Hmm, arg contains "len or *_len". /me sets parent arg to a reference
 					paramData.defaultValue = '256'; //Set all sizeof/len to this value
-				}							
+				}
+				if(match = paramData.defaultValue.match(/^{(.*)}/)) //Check if default value contains array
+				{
+					paramData.type = 'a'; //Not supported yet: Assuming the format specifier will be 'a'
+					paramData.defaultValue = '[' + match[1].trim() + ']';
+				}				
 				if(param.charAt(0) == '&') //reference
 				{
 					paramData.reference = true;
@@ -109,23 +115,21 @@ function getData(arr, ignoreArr, cb)
 				}
 				if(match = param.match(/(\w+)\s*\[\s*\]$/)) //Check if it's an array (str[])
 				{
-					paramData.type = 's';
+					if(paramData.type != 'a') {
+						paramData.type = 's';
+					}
 					param = match[1];
 				}
-				if(/\.\.\./g.test(param)) //Check if its variadic
+				if(/\.\.\./g.test(param)) //Check if its variadic. /not supported by CallNativeGDK
 				{
 					paramData.type = '';
 					paramData.variadic = true;
 				}
-				if(param == 'function') { //"function" is a reserved keyword in javascript
-					param = 'func';
-				}
-				if(match = paramData.defaultValue.match(/^{(.*)}/)) { //Check if default value contains array
-					paramData.defaultValue = '[' + match[1].trim() + ']'; //Change it to js array (right???)
-				}
 				if(!/^([A-Z].*[XYZ]$|([a-z]|sz)[A-Z])/.test(param)) { //Beauty touches! (Check if param dont match: fDuck, FromX)
 					param = param.slice(0, 2).toLowerCase() + param.substr(2); //Set the two first letters to lower-case (x, y, z, rx, ry...)
 				}
+				param == 'function' && (param = 'func'); //"function" is a reserved keyword in javascript
+				
 				switch(paramData.type) 
 				{
 					case 'f':
@@ -134,6 +138,9 @@ function getData(arr, ignoreArr, cb)
 						break;
 					case 's': 
 						paramData.fullType = 'String';
+						break;
+					case 'a':
+						paramData.fullType = 'Array';
 						break;
 					default:
 						if(paramData.variadic) {
@@ -215,7 +222,7 @@ function formatFunctions(data)
 				tmp_comment += '[' + param + '=' + paramData.defaultValue + ']';
 				optionals.push(param + " = typeof " + param + " === 'undefined' ? " + paramData.defaultValue + " : " + param + ";");
 			}
-			else tmp_comment += paramData.variadic ? '... (Not sure how to deal with this yet)' : param;
+			else tmp_comment += paramData.variadic ? '...' : param;
 			comments.push(tmp_comment);
 		}
 		params = params.join(', ');

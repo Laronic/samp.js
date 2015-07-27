@@ -1602,9 +1602,9 @@ function AttachDynamicAreaToVehicle(areaid, vehicleid) {
  * @param {Number} rz
  * @param {Number} [drawdistance=0.0]
  * @param {Number} [streamdistance=200.0]
- * @param {String} [worlds=[-1]]
- * @param {String} [interiors=[-1]]
- * @param {String} [players=[-1]]
+ * @param {Array} [worlds=[-1]]
+ * @param {Array} [interiors=[-1]]
+ * @param {Array} [players=[-1]]
  * @param {Number} [maxworlds=256]
  * @param {Number} [maxinteriors=256]
  * @param {Number} [maxplayers=256]
@@ -1620,7 +1620,7 @@ function CreateDynamicObjectEx(modelid, x, y, z, rx, ry, rz, drawdistance, strea
 	maxworlds = typeof maxworlds === 'undefined' ? 256 : maxworlds;
 	maxinteriors = typeof maxinteriors === 'undefined' ? 256 : maxinteriors;
 	maxplayers = typeof maxplayers === 'undefined' ? 256 : maxplayers;
-	return CallNativeGDK("CreateDynamicObjectEx", "iffffffffsssiii", modelid, x, y, z, rx, ry, rz, drawdistance, streamdistance, worlds, interiors, players, maxworlds, maxinteriors, maxplayers);
+	return CallNativeGDK("CreateDynamicObjectEx", "iffffffffaaaiii", modelid, x, y, z, rx, ry, rz, drawdistance, streamdistance, worlds, interiors, players, maxworlds, maxinteriors, maxplayers);
 }
 
 /**
@@ -1632,9 +1632,9 @@ function CreateDynamicObjectEx(modelid, x, y, z, rx, ry, rz, drawdistance, strea
  * @param {Number} y
  * @param {Number} z
  * @param {Number} [streamdistance=100.0]
- * @param {String} [worlds=[-1]]
- * @param {String} [interiors=[-1]]
- * @param {String} [players=[-1]]
+ * @param {Array} [worlds=[-1]]
+ * @param {Array} [interiors=[-1]]
+ * @param {Array} [players=[-1]]
  * @param {Number} [maxworlds=256]
  * @param {Number} [maxinteriors=256]
  * @param {Number} [maxplayers=256]
@@ -1649,7 +1649,7 @@ function CreateDynamicPickupEx(modelid, type, x, y, z, streamdistance, worlds, i
 	maxworlds = typeof maxworlds === 'undefined' ? 256 : maxworlds;
 	maxinteriors = typeof maxinteriors === 'undefined' ? 256 : maxinteriors;
 	maxplayers = typeof maxplayers === 'undefined' ? 256 : maxplayers;
-	return CallNativeGDK("CreateDynamicPickupEx", "iiffffsssiii", modelid, type, x, y, z, streamdistance, worlds, interiors, players, maxworlds, maxinteriors, maxplayers);
+	return CallNativeGDK("CreateDynamicPickupEx", "iiffffaaaiii", modelid, type, x, y, z, streamdistance, worlds, interiors, players, maxworlds, maxinteriors, maxplayers);
 }
 
 /**
@@ -1660,9 +1660,9 @@ function CreateDynamicPickupEx(modelid, type, x, y, z, streamdistance, worlds, i
  * @param {Number} z
  * @param {Number} size
  * @param {Number} [streamdistance=100.0]
- * @param {String} [worlds=[-1]]
- * @param {String} [interiors=[-1]]
- * @param {String} [players=[-1]]
+ * @param {Array} [worlds=[-1]]
+ * @param {Array} [interiors=[-1]]
+ * @param {Array} [players=[-1]]
  * @param {Number} [maxworlds=256]
  * @param {Number} [maxinteriors=256]
  * @param {Number} [maxplayers=256]
@@ -1677,7 +1677,7 @@ function CreateDynamicCPEx(x, y, z, size, streamdistance, worlds, interiors, pla
 	maxworlds = typeof maxworlds === 'undefined' ? 256 : maxworlds;
 	maxinteriors = typeof maxinteriors === 'undefined' ? 256 : maxinteriors;
 	maxplayers = typeof maxplayers === 'undefined' ? 256 : maxplayers;
-	return CallNativeGDK("CreateDynamicCPEx", "fffffsssiii", x, y, z, size, streamdistance, worlds, interiors, players, maxworlds, maxinteriors, maxplayers);
+	return CallNativeGDK("CreateDynamicCPEx", "fffffaaaiii", x, y, z, size, streamdistance, worlds, interiors, players, maxworlds, maxinteriors, maxplayers);
 }
 
 /**
@@ -1692,9 +1692,9 @@ function CreateDynamicCPEx(x, y, z, size, streamdistance, worlds, interiors, pla
  * @param {Number} nextz
  * @param {Number} size
  * @param {Number} [streamdistance=100.0]
- * @param {String} [worlds=[-1]]
- * @param {String} [interiors=[-1]]
- * @param {String} [players=[-1]]
+ * @param {Array} [worlds=[-1]]
+ * @param {Array} [interiors=[-1]]
+ * @param {Array} [players=[-1]]
  * @param {Number} [maxworlds=256]
  * @param {Number} [maxinteriors=256]
  * @param {Number} [maxplayers=256]
@@ -1709,7 +1709,7 @@ function CreateDynamicRaceCPEx(type, x, y, z, nextx, nexty, nextz, size, streamd
 	maxworlds = typeof maxworlds === 'undefined' ? 256 : maxworlds;
 	maxinteriors = typeof maxinteriors === 'undefined' ? 256 : maxinteriors;
 	maxplayers = typeof maxplayers === 'undefined' ? 256 : maxplayers;
-	return CallNativeGDK("CreateDynamicRaceCPEx", "iffffffffsssiii", type, x, y, z, nextx, nexty, nextz, size, streamdistance, worlds, interiors, players, maxworlds, maxinteriors, maxplayers);
+	return CallNativeGDK("CreateDynamicRaceCPEx", "iffffffffaaaiii", type, x, y, z, nextx, nexty, nextz, size, streamdistance, worlds, interiors, players, maxworlds, maxinteriors, maxplayers);
 }
 
 /**
@@ -1722,9 +1722,9 @@ function CreateDynamicRaceCPEx(type, x, y, z, nextx, nexty, nextz, size, streamd
  * @param {Number} color
  * @param {Number} [style=MAPICON_LOCAL]
  * @param {Number} [streamdistance=100.0]
- * @param {String} [worlds=[-1]]
- * @param {String} [interiors=[-1]]
- * @param {String} [players=[-1]]
+ * @param {Array} [worlds=[-1]]
+ * @param {Array} [interiors=[-1]]
+ * @param {Array} [players=[-1]]
  * @param {Number} [maxworlds=256]
  * @param {Number} [maxinteriors=256]
  * @param {Number} [maxplayers=256]
@@ -1740,7 +1740,7 @@ function CreateDynamicMapIconEx(x, y, z, type, color, style, streamdistance, wor
 	maxworlds = typeof maxworlds === 'undefined' ? 256 : maxworlds;
 	maxinteriors = typeof maxinteriors === 'undefined' ? 256 : maxinteriors;
 	maxplayers = typeof maxplayers === 'undefined' ? 256 : maxplayers;
-	return CallNativeGDK("CreateDynamicMapIconEx", "fffiiifsssiii", x, y, z, type, color, style, streamdistance, worlds, interiors, players, maxworlds, maxinteriors, maxplayers);
+	return CallNativeGDK("CreateDynamicMapIconEx", "fffiiifaaaiii", x, y, z, type, color, style, streamdistance, worlds, interiors, players, maxworlds, maxinteriors, maxplayers);
 }
 
 /**
@@ -1756,9 +1756,9 @@ function CreateDynamicMapIconEx(x, y, z, type, color, style, streamdistance, wor
  * @param {Number} [attachedvehicle=INVALID_VEHICLE_ID]
  * @param {Number} [testlos=0]
  * @param {Number} [streamdistance=100.0]
- * @param {String} [worlds=[-1]]
- * @param {String} [interiors=[-1]]
- * @param {String} [players=[-1]]
+ * @param {Array} [worlds=[-1]]
+ * @param {Array} [interiors=[-1]]
+ * @param {Array} [players=[-1]]
  * @param {Number} [maxworlds=256]
  * @param {Number} [maxinteriors=256]
  * @param {Number} [maxplayers=256]
@@ -1776,7 +1776,7 @@ function CreateDynamic3DTextLabelEx(text, color, x, y, z, drawdistance, attached
 	maxworlds = typeof maxworlds === 'undefined' ? 256 : maxworlds;
 	maxinteriors = typeof maxinteriors === 'undefined' ? 256 : maxinteriors;
 	maxplayers = typeof maxplayers === 'undefined' ? 256 : maxplayers;
-	return CallNativeGDK("CreateDynamic3DTextLabelEx", "siffffiiifsssiii", text, color, x, y, z, drawdistance, attachedplayer, attachedvehicle, testlos, streamdistance, worlds, interiors, players, maxworlds, maxinteriors, maxplayers);
+	return CallNativeGDK("CreateDynamic3DTextLabelEx", "siffffiiifaaaiii", text, color, x, y, z, drawdistance, attachedplayer, attachedvehicle, testlos, streamdistance, worlds, interiors, players, maxworlds, maxinteriors, maxplayers);
 }
 
 /**
@@ -1785,9 +1785,9 @@ function CreateDynamic3DTextLabelEx(text, color, x, y, z, drawdistance, attached
  * @param {Number} x
  * @param {Number} y
  * @param {Number} size
- * @param {String} [worlds=[-1]]
- * @param {String} [interiors=[-1]]
- * @param {String} [players=[-1]]
+ * @param {Array} [worlds=[-1]]
+ * @param {Array} [interiors=[-1]]
+ * @param {Array} [players=[-1]]
  * @param {Number} [maxworlds=256]
  * @param {Number} [maxinteriors=256]
  * @param {Number} [maxplayers=256]
@@ -1801,7 +1801,7 @@ function CreateDynamicCircleEx(x, y, size, worlds, interiors, players, maxworlds
 	maxworlds = typeof maxworlds === 'undefined' ? 256 : maxworlds;
 	maxinteriors = typeof maxinteriors === 'undefined' ? 256 : maxinteriors;
 	maxplayers = typeof maxplayers === 'undefined' ? 256 : maxplayers;
-	return CallNativeGDK("CreateDynamicCircleEx", "fffsssiii", x, y, size, worlds, interiors, players, maxworlds, maxinteriors, maxplayers);
+	return CallNativeGDK("CreateDynamicCircleEx", "fffaaaiii", x, y, size, worlds, interiors, players, maxworlds, maxinteriors, maxplayers);
 }
 
 /**
@@ -1812,9 +1812,9 @@ function CreateDynamicCircleEx(x, y, size, worlds, interiors, players, maxworlds
  * @param {Number} minz
  * @param {Number} maxz
  * @param {Number} size
- * @param {String} [worlds=[-1]]
- * @param {String} [interiors=[-1]]
- * @param {String} [players=[-1]]
+ * @param {Array} [worlds=[-1]]
+ * @param {Array} [interiors=[-1]]
+ * @param {Array} [players=[-1]]
  * @param {Number} [maxworlds=256]
  * @param {Number} [maxinteriors=256]
  * @param {Number} [maxplayers=256]
@@ -1828,7 +1828,7 @@ function CreateDynamicCylinderEx(x, y, minz, maxz, size, worlds, interiors, play
 	maxworlds = typeof maxworlds === 'undefined' ? 256 : maxworlds;
 	maxinteriors = typeof maxinteriors === 'undefined' ? 256 : maxinteriors;
 	maxplayers = typeof maxplayers === 'undefined' ? 256 : maxplayers;
-	return CallNativeGDK("CreateDynamicCylinderEx", "fffffsssiii", x, y, minz, maxz, size, worlds, interiors, players, maxworlds, maxinteriors, maxplayers);
+	return CallNativeGDK("CreateDynamicCylinderEx", "fffffaaaiii", x, y, minz, maxz, size, worlds, interiors, players, maxworlds, maxinteriors, maxplayers);
 }
 
 /**
@@ -1838,9 +1838,9 @@ function CreateDynamicCylinderEx(x, y, minz, maxz, size, worlds, interiors, play
  * @param {Number} y
  * @param {Number} z
  * @param {Number} size
- * @param {String} [worlds=[-1]]
- * @param {String} [interiors=[-1]]
- * @param {String} [players=[-1]]
+ * @param {Array} [worlds=[-1]]
+ * @param {Array} [interiors=[-1]]
+ * @param {Array} [players=[-1]]
  * @param {Number} [maxworlds=256]
  * @param {Number} [maxinteriors=256]
  * @param {Number} [maxplayers=256]
@@ -1854,7 +1854,7 @@ function CreateDynamicSphereEx(x, y, z, size, worlds, interiors, players, maxwor
 	maxworlds = typeof maxworlds === 'undefined' ? 256 : maxworlds;
 	maxinteriors = typeof maxinteriors === 'undefined' ? 256 : maxinteriors;
 	maxplayers = typeof maxplayers === 'undefined' ? 256 : maxplayers;
-	return CallNativeGDK("CreateDynamicSphereEx", "ffffsssiii", x, y, z, size, worlds, interiors, players, maxworlds, maxinteriors, maxplayers);
+	return CallNativeGDK("CreateDynamicSphereEx", "ffffaaaiii", x, y, z, size, worlds, interiors, players, maxworlds, maxinteriors, maxplayers);
 }
 
 /**
@@ -1864,9 +1864,9 @@ function CreateDynamicSphereEx(x, y, z, size, worlds, interiors, players, maxwor
  * @param {Number} miny
  * @param {Number} maxx
  * @param {Number} maxy
- * @param {String} [worlds=[-1]]
- * @param {String} [interiors=[-1]]
- * @param {String} [players=[-1]]
+ * @param {Array} [worlds=[-1]]
+ * @param {Array} [interiors=[-1]]
+ * @param {Array} [players=[-1]]
  * @param {Number} [maxworlds=256]
  * @param {Number} [maxinteriors=256]
  * @param {Number} [maxplayers=256]
@@ -1880,7 +1880,7 @@ function CreateDynamicRectangleEx(minx, miny, maxx, maxy, worlds, interiors, pla
 	maxworlds = typeof maxworlds === 'undefined' ? 256 : maxworlds;
 	maxinteriors = typeof maxinteriors === 'undefined' ? 256 : maxinteriors;
 	maxplayers = typeof maxplayers === 'undefined' ? 256 : maxplayers;
-	return CallNativeGDK("CreateDynamicRectangleEx", "ffffsssiii", minx, miny, maxx, maxy, worlds, interiors, players, maxworlds, maxinteriors, maxplayers);
+	return CallNativeGDK("CreateDynamicRectangleEx", "ffffaaaiii", minx, miny, maxx, maxy, worlds, interiors, players, maxworlds, maxinteriors, maxplayers);
 }
 
 /**
@@ -1892,9 +1892,9 @@ function CreateDynamicRectangleEx(minx, miny, maxx, maxy, worlds, interiors, pla
  * @param {Number} maxx
  * @param {Number} maxy
  * @param {Number} maxz
- * @param {String} [worlds=[-1]]
- * @param {String} [interiors=[-1]]
- * @param {String} [players=[-1]]
+ * @param {Array} [worlds=[-1]]
+ * @param {Array} [interiors=[-1]]
+ * @param {Array} [players=[-1]]
  * @param {Number} [maxworlds=256]
  * @param {Number} [maxinteriors=256]
  * @param {Number} [maxplayers=256]
@@ -1908,7 +1908,7 @@ function CreateDynamicCuboidEx(minx, miny, minz, maxx, maxy, maxz, worlds, inter
 	maxworlds = typeof maxworlds === 'undefined' ? 256 : maxworlds;
 	maxinteriors = typeof maxinteriors === 'undefined' ? 256 : maxinteriors;
 	maxplayers = typeof maxplayers === 'undefined' ? 256 : maxplayers;
-	return CallNativeGDK("CreateDynamicCuboidEx", "ffffffsssiii", minx, miny, minz, maxx, maxy, maxz, worlds, interiors, players, maxworlds, maxinteriors, maxplayers);
+	return CallNativeGDK("CreateDynamicCuboidEx", "ffffffaaaiii", minx, miny, minz, maxx, maxy, maxz, worlds, interiors, players, maxworlds, maxinteriors, maxplayers);
 }
 
 /**
@@ -1920,9 +1920,9 @@ function CreateDynamicCuboidEx(minx, miny, minz, maxx, maxy, maxz, worlds, inter
  * @param {Number} maxx
  * @param {Number} maxy
  * @param {Number} maxz
- * @param {String} [worlds=[-1]]
- * @param {String} [interiors=[-1]]
- * @param {String} [players=[-1]]
+ * @param {Array} [worlds=[-1]]
+ * @param {Array} [interiors=[-1]]
+ * @param {Array} [players=[-1]]
  * @param {Number} [maxworlds=256]
  * @param {Number} [maxinteriors=256]
  * @param {Number} [maxplayers=256]
@@ -1936,7 +1936,7 @@ function CreateDynamicCubeEx(minx, miny, minz, maxx, maxy, maxz, worlds, interio
 	maxworlds = typeof maxworlds === 'undefined' ? 256 : maxworlds;
 	maxinteriors = typeof maxinteriors === 'undefined' ? 256 : maxinteriors;
 	maxplayers = typeof maxplayers === 'undefined' ? 256 : maxplayers;
-	return CallNativeGDK("CreateDynamicCubeEx", "ffffffsssiii", minx, miny, minz, maxx, maxy, maxz, worlds, interiors, players, maxworlds, maxinteriors, maxplayers);
+	return CallNativeGDK("CreateDynamicCubeEx", "ffffffaaaiii", minx, miny, minz, maxx, maxy, maxz, worlds, interiors, players, maxworlds, maxinteriors, maxplayers);
 }
 
 /**
@@ -1946,9 +1946,9 @@ function CreateDynamicCubeEx(minx, miny, minz, maxx, maxy, maxz, worlds, interio
  * @param {Number} [minz=-FLOAT_INFINITY]
  * @param {Number} [maxz=FLOAT_INFINITY]
  * @param {Number} [maxpoints=256]
- * @param {String} [worlds=[-1]]
- * @param {String} [interiors=[-1]]
- * @param {String} [players=[-1]]
+ * @param {Array} [worlds=[-1]]
+ * @param {Array} [interiors=[-1]]
+ * @param {Array} [players=[-1]]
  * @param {Number} [maxworlds=256]
  * @param {Number} [maxinteriors=256]
  * @param {Number} [maxplayers=256]
@@ -1965,7 +1965,7 @@ function CreateDynamicPolygonEx(points, minz, maxz, maxpoints, worlds, interiors
 	maxworlds = typeof maxworlds === 'undefined' ? 256 : maxworlds;
 	maxinteriors = typeof maxinteriors === 'undefined' ? 256 : maxinteriors;
 	maxplayers = typeof maxplayers === 'undefined' ? 256 : maxplayers;
-	return CallNativeGDK("CreateDynamicPolygonEx", "sffisssiii", points, minz, maxz, maxpoints, worlds, interiors, players, maxworlds, maxinteriors, maxplayers);
+	return CallNativeGDK("CreateDynamicPolygonEx", "sffiaaaiii", points, minz, maxz, maxpoints, worlds, interiors, players, maxworlds, maxinteriors, maxplayers);
 }
 
 /**
@@ -2027,7 +2027,7 @@ function Streamer_CellSize(size) {
  * Streamer_CallbackHook
  * @see https://wiki.sa-mp.com/wiki/Streamer_CallbackHook
  * @param {Number} callback
- * @param {Mixed} ... (Not sure how to deal with this yet)
+ * @param {Mixed} ...
  * @return {Number} retval
  */
 function Streamer_CallbackHook(callback) {
