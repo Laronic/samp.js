@@ -15,30 +15,27 @@ var fs = require('fs');
 
 fs.readdir('includes', function(err, files)
 {
+	var 
+		ignore = [
+			'print', 
+			'printf', 
+			'format', 
+			'asin', 
+			'acos', 
+			'atan', 
+			'atan2', 
+			'SetTimer', 
+			'AllowAdminTeleport'
+		],
+		output = ''
+	;
 	for(var i in files) 
 	{
-		var 
-			options = {
-				ignore_natives: [
-					'print', 
-					'printf', 
-					'format', 
-					'asin', 
-					'acos', 
-					'atan', 
-					'atan2', 
-					'SetTimer', 
-					'AllowAdminTeleport'
-				]
-			},
-			output = '',
-			content = fs.readFileSync('includes/' + files[i], 'utf8')
-		;
-		getData(content.split('\n'), options, function(data)
+		getData(fs.readFileSync('includes/' + files[i], 'utf8').split('\n'), ignore, function(data)
 		{
 			if(data.defines.length)
 			{
-				output = data.defines.join('\n');
+				output += data.defines.join('\n');
 				output += "\n\n";
 			}
 			if(['a_actor.inc', 'a_http.inc', 'a_npc.inc', 'a_objects.inc', 'a_players.inc', 'a_samp.inc', 'a_sampdb.inc', 'a_vehicles.inc'].indexOf(files[i]) == -1)
@@ -47,13 +44,13 @@ fs.readdir('includes', function(err, files)
 				output += "\n\n";
 			}
 			output += formatFunctions(data.natives) + '\n';
-			fs.writeFile('converted/' + files[i] + '.js', output, 'utf8');		
+			fs.writeFile('converted/' + files[i] + '.js', output, 'utf8'), output = '';		
 		});
 		console.log('Converting: ' + files[i]);
 	}
 });
 
-function getData(arr, opts, cb)
+function getData(arr, ignoreArr, cb)
 {
 	var data = {
 		natives: [],
@@ -69,7 +66,7 @@ function getData(arr, opts, cb)
 				functionParams = match[3].match(/\s*(?:{[^}]+}|[^,])+/g),
 				functionType = (match[1] == 'native') ? 'natives' : 'publics'
 			;
-			if(opts && (opts.ignore_natives || []).indexOf(functionName) > -1) {
+			if((ignoreArr || []).indexOf(functionName) > -1) {
 				continue;
 			}
 			data[functionType][functionName] = {};
