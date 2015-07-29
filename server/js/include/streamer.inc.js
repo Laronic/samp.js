@@ -1339,7 +1339,7 @@ function CreateDynamicCube(minx, miny, minz, maxx, maxy, maxz, worldid, interior
 /**
  * CreateDynamicPolygon
  * @see https://wiki.sa-mp.com/wiki/CreateDynamicPolygon
- * @param {String} points
+ * @param {Array} points
  * @param {Number} [minz=-FLOAT_INFINITY]
  * @param {Number} [maxz=FLOAT_INFINITY]
  * @param {Number} [maxpoints=256]
@@ -1356,7 +1356,7 @@ function CreateDynamicPolygon(points, minz, maxz, maxpoints, worldid, interiorid
 	worldid = typeof worldid === 'undefined' ? -1 : worldid;
 	interiorid = typeof interiorid === 'undefined' ? -1 : interiorid;
 	playerid = typeof playerid === 'undefined' ? -1 : playerid;
-	return CallNativeGDK("CreateDynamicPolygon", "sffiiii", points, minz, maxz, maxpoints, worldid, interiorid, playerid);
+	return CallNativeGDK("CreateDynamicPolygon", "vffiiii", points, minz, maxz, maxpoints, worldid, interiorid, playerid);
 }
 
 /**
@@ -1384,12 +1384,12 @@ function IsValidDynamicArea(areaid) {
  * @see https://wiki.sa-mp.com/wiki/GetDynamicPolygonPoints
  * @param {Number} areaid
  * @param {Number} [maxpoints=256]
- * @return {String} points
+ * @return {Array} points
  */
 function GetDynamicPolygonPoints(areaid, maxpoints)
 {
 	maxpoints = typeof maxpoints === 'undefined' ? 256 : maxpoints;
-	return CallNativeGDK("GetDynamicPolygonPoints", "iSi", areaid, maxpoints);
+	return CallNativeGDK("GetDynamicPolygonPoints", "iVi", areaid, maxpoints);
 }
 
 /**
@@ -1942,7 +1942,7 @@ function CreateDynamicCubeEx(minx, miny, minz, maxx, maxy, maxz, worlds, interio
 /**
  * CreateDynamicPolygonEx
  * @see https://wiki.sa-mp.com/wiki/CreateDynamicPolygonEx
- * @param {String} points
+ * @param {Array} points
  * @param {Number} [minz=-FLOAT_INFINITY]
  * @param {Number} [maxz=FLOAT_INFINITY]
  * @param {Number} [maxpoints=256]
@@ -1965,7 +1965,7 @@ function CreateDynamicPolygonEx(points, minz, maxz, maxpoints, worlds, interiors
 	maxworlds = typeof maxworlds === 'undefined' ? 256 : maxworlds;
 	maxinteriors = typeof maxinteriors === 'undefined' ? 256 : maxinteriors;
 	maxplayers = typeof maxplayers === 'undefined' ? 256 : maxplayers;
-	return CallNativeGDK("CreateDynamicPolygonEx", "sffiaaaiii", points, minz, maxz, maxpoints, worlds, interiors, players, maxworlds, maxinteriors, maxplayers);
+	return CallNativeGDK("CreateDynamicPolygonEx", "vffiaaaiii", points, minz, maxz, maxpoints, worlds, interiors, players, maxworlds, maxinteriors, maxplayers);
 }
 
 /**

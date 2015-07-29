@@ -98,7 +98,7 @@ function getData(arr, ignoreArr, cb)
 				}
 				if(match = paramData.defaultValue.match(/^{(.*)}/)) //Check if default value contains array
 				{
-					paramData.type = 'a'; //Not supported yet: Assuming the format specifier will be 'a'
+					paramData.type = 'a';
 					paramData.defaultValue = '[' + match[1].trim() + ']';
 				}				
 				if(param.charAt(0) == '&') //reference
@@ -115,7 +115,10 @@ function getData(arr, ignoreArr, cb)
 				}
 				if(match = param.match(/(\w+)\s*\[\s*\]$/)) //Check if it's an array (str[])
 				{
-					if(paramData.type != 'a') {
+					if(paramData.type == 'f') {
+						paramData.type = 'v';
+					}
+					if(paramData.type != 'a' && paramData.type != 'v') {
 						paramData.type = 's';
 					}
 					param = match[1];
@@ -140,6 +143,7 @@ function getData(arr, ignoreArr, cb)
 						paramData.fullType = 'String';
 						break;
 					case 'a':
+					case 'v':
 						paramData.fullType = 'Array';
 						break;
 					default:
