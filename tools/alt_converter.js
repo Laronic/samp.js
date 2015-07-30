@@ -90,13 +90,13 @@ function getData(arr, ignoreArr, cb)
 					var isArray = false;
 					if(typeof match[1] !== 'undefined') //Found sizeof value?
 					{
-						if((data.natives[functionName][match[1]].type == 'a' || data.natives[functionName][match[1]].type == 'v'))
+						if(!/^(Create|Set)/.test(functionName)) { //Create* or Set* will MOST LIKELY NOT be a reference
+							data.natives[functionName][match[1]].reference = true;
+						}
+						if((data.natives[functionName][match[1]].type == 'a' || data.natives[functionName][match[1]].type == 'v') && !data.natives[functionName][match[1]].reference)
 						{
 							isArray = true;
 							paramData.defaultValue = (match[1] + '.length');
-						}
-						if(!/^(Create|Set)/.test(functionName)) { //Create* or Set* will MOST LIKELY NOT be a reference
-							data.natives[functionName][match[1]].reference = true;
 						}
 					}
 					else data.natives[functionName][Object.keys(data.natives[functionName]).pop()].reference = true; //Hmm, arg contains "len or *_len". /me sets parent arg to a reference
