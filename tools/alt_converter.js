@@ -185,7 +185,7 @@ function formatPublics(data)
 			types += data[functionName][param];
 			params.push("'" + param + "'");
 		}
-		output.push('RegisterPublic("' + functionName + '", "' + functionName.replace(/^On/, '') + '", "' + types + '", [' + params.join(', ') + ']);');
+		output.push('RegisterPublic("' + functionName + '", "' + types + '", "' + functionName.replace(/^On/, '') + '", [' + params.join(', ') + ']);');
 	}
 	return output.join('\n');
 }
