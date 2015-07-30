@@ -1389,7 +1389,7 @@ function IsValidDynamicArea(areaid) {
 function GetDynamicPolygonPoints(areaid, maxpoints)
 {
 	maxpoints = typeof maxpoints === 'undefined' ? 256 : maxpoints;
-	return CallNativeGDK("GetDynamicPolygonPoints", "iVi", areaid, maxpoints);
+	return CallNativeGDK("GetDynamicPolygonPoints", "iAi", areaid, maxpoints);
 }
 
 /**
@@ -1965,7 +1965,7 @@ function CreateDynamicPolygonEx(points, minz, maxz, maxpoints, worlds, interiors
 	maxworlds = typeof maxworlds === 'undefined' ? 256 : maxworlds;
 	maxinteriors = typeof maxinteriors === 'undefined' ? 256 : maxinteriors;
 	maxplayers = typeof maxplayers === 'undefined' ? 256 : maxplayers;
-	return CallNativeGDK("CreateDynamicPolygonEx", "vffiaaaiii", points, minz, maxz, maxpoints, worlds, interiors, players, maxworlds, maxinteriors, maxplayers);
+	return CallNativeGDK("CreateDynamicPolygonEx", "affiaaaiii", points, minz, maxz, maxpoints, worlds, interiors, players, maxworlds, maxinteriors, maxplayers);
 }
 
 /**
