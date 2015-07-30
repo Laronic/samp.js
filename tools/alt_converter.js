@@ -87,14 +87,20 @@ function getData(arr, ignoreArr, cb)
 				
 				if(match = paramData.defaultValue.match(/sizeof\s*\(?\s*(\w*)\s*\)?/) || /(^len|_len)/.test(param))
 				{
+					var isArray = false;
 					if(typeof match[1] !== 'undefined') //Found sizeof value?
 					{
+						if((data.natives[functionName][match[1]].type == 'a' || data.natives[functionName][match[1]].type == 'v'))
+						{
+							isArray = true;
+							paramData.defaultValue = (match[1] + '.length');
+						}
 						if(!/^(Create|Set)/.test(functionName)) { //Create* or Set* will MOST LIKELY NOT be a reference
 							data.natives[functionName][match[1]].reference = true;
 						}
 					}
 					else data.natives[functionName][Object.keys(data.natives[functionName]).pop()].reference = true; //Hmm, arg contains "len or *_len". /me sets parent arg to a reference
-					paramData.defaultValue = '256'; //Set all sizeof/len to this value
+					!isArray && (paramData.defaultValue = '256'); //Set all sizeof/len to this value
 				}
 				if(match = paramData.defaultValue.match(/^{(.*)}/)) //Check if default value contains array
 				{
