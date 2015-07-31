@@ -88,12 +88,12 @@ function getData(arr, ignoreArr, cb)
 					}
 				;
 				
-				if(match = paramData.defaultValue.match(/sizeof\s*\(?\s*(\w*)\s*\)?/) || /(^len|_len)/.test(param))
+				if(match = paramData.defaultValue.match(/sizeof\s*\(?\s*(\w*)\s*\)?/) || /(^len|_len|maxlen)/.test(param))
 				{
 					var isArray = false;
 					if(typeof match[1] !== 'undefined') //Found sizeof value?
 					{
-						if(!/^(Create|Set)/.test(functionName)) { //Create* or Set* will MOST LIKELY NOT be a reference
+						if(!/^(Create|Set)/.test(functionName)) { //ignore Create and Set
 							data.natives[functionName][match[1]].reference = true;
 						}
 						if((data.natives[functionName][match[1]].type == 'a' || data.natives[functionName][match[1]].type == 'v') && !data.natives[functionName][match[1]].reference)
