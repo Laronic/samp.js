@@ -74,12 +74,13 @@ function db_num_fields(dbresult) {
  * @see https://wiki.sa-mp.com/wiki/db_field_name
  * @param {Number} dbresult
  * @param {Number} field
- * @param {String} result
- * @param {Number} maxlength
- * @return {Number} retval
+ * @param {Number} [maxlength=256]
+ * @return {String} result
  */
-function db_field_name(dbresult, field, result, maxlength) {
-	return CallNativeGDK("db_field_name", "iisi", dbresult, field, result, maxlength);
+function db_field_name(dbresult, field, maxlength)
+{
+	maxlength = typeof maxlength === 'undefined' ? 256 : maxlength;
+	return CallNativeGDK("db_field_name", "iiSi", dbresult, field, maxlength);
 }
 
 /**
@@ -87,12 +88,13 @@ function db_field_name(dbresult, field, result, maxlength) {
  * @see https://wiki.sa-mp.com/wiki/db_get_field
  * @param {Number} dbresult
  * @param {Number} field
- * @param {String} result
- * @param {Number} maxlength
- * @return {Number} retval
+ * @param {Number} [maxlength=256]
+ * @return {String} result
  */
-function db_get_field(dbresult, field, result, maxlength) {
-	return CallNativeGDK("db_get_field", "iisi", dbresult, field, result, maxlength);
+function db_get_field(dbresult, field, maxlength)
+{
+	maxlength = typeof maxlength === 'undefined' ? 256 : maxlength;
+	return CallNativeGDK("db_get_field", "iiSi", dbresult, field, maxlength);
 }
 
 /**
@@ -126,12 +128,13 @@ function db_get_field_float(result, field)
  * @see https://wiki.sa-mp.com/wiki/db_get_field_assoc
  * @param {Number} dbresult
  * @param {String} field
- * @param {String} result
- * @param {Number} maxlength
- * @return {Number} retval
+ * @param {Number} [maxlength=256]
+ * @return {String} result
  */
-function db_get_field_assoc(dbresult, field, result, maxlength) {
-	return CallNativeGDK("db_get_field_assoc", "issi", dbresult, field, result, maxlength);
+function db_get_field_assoc(dbresult, field, maxlength)
+{
+	maxlength = typeof maxlength === 'undefined' ? 256 : maxlength;
+	return CallNativeGDK("db_get_field_assoc", "isSi", dbresult, field, maxlength);
 }
 
 /**
