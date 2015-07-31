@@ -44,6 +44,8 @@ fs.readdir('includes', function(err, files)
 				output += formatPublics(data.publics);
 				output += "\n\n";
 			}
+			else fs.writeFile('converted/Publics.js', formatPublics(data.publics), 'utf8');		
+			
 			output += formatFunctions(data.natives) + '\n';
 			fs.writeFile('converted/' + files[i] + '.js', output, 'utf8'), output = '';		
 		});
@@ -184,6 +186,7 @@ function formatPublics(data)
 	{
 		var
 			params = [],
+			args = [],
 			types = ''
 		;
 		for(var param in data[functionName])
@@ -191,7 +194,17 @@ function formatPublics(data)
 			types += data[functionName][param];
 			params.push("'" + param + "'");
 		}
-		output.push('RegisterPublic("' + functionName + '", "' + types + '", "' + functionName.replace(/^On/, '') + '", [' + params.join(', ') + ']);');
+		args.push('"' + functionName + '"');
+		args.push('"' + types + '"');
+		args.push('"' + functionName.replace(/^On/, '') + '"');
+		
+		if(functionName == 'OnRconCommand' || functionName == 'OnPlayerCommandText') {
+			args.push(true);
+		}
+		if(params.length) {
+			args.push('[' + params.join(', ') + ']');
+		}
+		output.push('RegisterPublic(' + args.join(', ') + ');');
 	}
 	return output.join('\n');
 }
