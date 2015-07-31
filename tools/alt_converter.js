@@ -3,18 +3,19 @@
  * Create this dir tree:
  *
  * |-# your_directory
- *    |-# includes
+ *    |-# input
  *    | |- a_samp.inc
  *    | |- a_player.inc
  *    | |- anything.inc
- *    |-# converted
+ *    |-# include
+ *    |-# samp.js
  *    |- alt_converter.js
  *
  * cd to your_directory and run the node command: node alt_converter.js
  */
 var fs = require('fs');
 
-fs.readdir('includes', function(err, files)
+fs.readdir('input', function(err, files)
 {
 	var 
 		ignore = [
@@ -32,7 +33,7 @@ fs.readdir('includes', function(err, files)
 	;
 	for(var i in files) 
 	{
-		getData(fs.readFileSync('includes/' + files[i], 'utf8').split('\n'), ignore, function(data)
+		getData(fs.readFileSync('input/' + files[i], 'utf8').split('\n'), ignore, function(data)
 		{
 			if(data.defines.length)
 			{
@@ -44,10 +45,10 @@ fs.readdir('includes', function(err, files)
 				output += formatPublics(data.publics);
 				output += "\n\n";
 			}
-			else fs.writeFile('converted/Publics.js', formatPublics(data.publics), 'utf8');		
+			else fs.writeFile('samp.js/Publics.js', formatPublics(data.publics), 'utf8');		
 			
 			output += formatFunctions(data.natives) + '\n';
-			fs.writeFile('converted/' + files[i] + '.js', output, 'utf8'), output = '';		
+			fs.writeFile('include/' + files[i] + '.js', output, 'utf8'), output = '';		
 		});
 		console.log('Converting: ' + files[i]);
 	}
