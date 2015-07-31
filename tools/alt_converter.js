@@ -88,7 +88,7 @@ function getData(arr, ignoreArr, cb)
 					}
 				;
 				
-				if(match = paramData.defaultValue.match(/sizeof\s*\(?\s*(\w*)\s*\)?/) || /(^len|_len|maxlen)/.test(param))
+				if(match = paramData.defaultValue.match(/sizeof\s*\(?\s*(\w*)\s*\)?/) || param.indexOf('len') > -1)
 				{
 					var isArray = false;
 					if(typeof match[1] !== 'undefined') //Found sizeof value?
@@ -103,7 +103,7 @@ function getData(arr, ignoreArr, cb)
 						}
 					}
 					else data.natives[functionName][Object.keys(data.natives[functionName]).pop()].reference = true; //Hmm, arg contains "len or *_len". /me sets parent arg to a reference
-					!isArray && (paramData.defaultValue = '256'); //Set all sizeof/len to this value
+					!isArray && (paramData.defaultValue = '256'); //Set all sizeof/len to this value except for arrays
 				}
 				if(match = paramData.defaultValue.match(/^{(.*)}/)) //Check if default value contains array
 				{
