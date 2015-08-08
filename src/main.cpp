@@ -18,13 +18,17 @@
 
 #include "utils/Helpers.h"
 
+
+
 #include <sampgdk/sampgdk.h>
+
+#include "io/HTTP.h"
 
 
 #define VERSION_MAJOR 0
 #define VERSION_MINOR 1
 #define VERSION_BUGFIX 9
-#define VERSION_REVISION 5
+#define VERSION_REVISION 6
 
 typedef void(*logprintf_t)(char* format, ...);
 logprintf_t logprintf;
@@ -79,7 +83,22 @@ PLUGIN_EXPORT bool PLUGIN_CALL Load(void **ppData){
 	sjs::logger::log("*** Loaded samp.js v%i.%i.%i.%i by !damo!spiderman ***", VERSION_MAJOR, VERSION_MINOR, VERSION_BUGFIX, VERSION_REVISION);
 	sjs::logger::log("%s", std::string(69, '-').c_str());
 	ReadConfig();
+	
+	string version = sampjs::HTTPJS::Get("http://damo.com.au/version");
 
+	char cversion[20];
+	sprintf(cversion, "v%i.%i.%i.%i", VERSION_MAJOR, VERSION_MINOR, VERSION_BUGFIX, VERSION_REVISION);
+
+	if (version != string(cversion)){
+		sjs::logger::log("*** Warning: Your version of samp.js is out of date. Latest version: %s ***", version.c_str());
+	}
+	else {
+		sjs::logger::log("*** samp.js is up to date ***");
+	}
+
+	
+
+	
 	return true;
 }
 
@@ -97,7 +116,16 @@ PLUGIN_EXPORT void PLUGIN_CALL Unload(){
 
 #include "samp/Natives.h"
 
+#include <chrono>
+#include <thread>
 PLUGIN_EXPORT int PLUGIN_CALL AmxLoad(AMX *amx){
+	char t[256] = "";
+	AMX_NATIVE native = sampgdk::FindNative("SHA256_PassHash");
+	if (!native) sjs::logger::log("Could not find SHA256 Native");
+	else {
+		sampgdk::InvokeNative(native, "ssS[256]", "Test", "Test", &t);
+		printf("SHA256: %s", t);
+	}
 	int res = 0;
 	if ((res = amx_Register(amx, PluginNatives, -1))){
 		printf("Failed to register samp.js natives.\n");
@@ -113,6 +141,7 @@ PLUGIN_EXPORT int PLUGIN_CALL AmxLoad(AMX *amx){
 				sampjs::SAMPJS::CreateScript(js_scripts[i]);
 			}
 			std::cout << std::endl;
+			sampjs::SAMPJS::ScriptInit();
 		}
 		else {
 			std::cout << "[samp.js] No JS Scripts configured. Add jsfiles to your server.cfg" << std::endl;
@@ -131,7 +160,12 @@ PLUGIN_EXPORT int PLUGIN_CALL AmxLoad(AMX *amx){
 	std::vector<std::string> args = sjs::string::split(cmd);
 	if (args[0] == "loadjs"){
 		if (args.size() > 1){
-			sampjs::SAMPJS::CreateScript(args[1]);
+			if (sampjs::SAMPJS::CreateScript(args[1])){
+				auto script = sampjs::SAMPJS::GetScript(args[1]);
+				if (script){
+					script->Server()->FireEvent("ScriptInit");
+				}
+			}
 		}
 		return true;
 	}
@@ -144,7 +178,20 @@ PLUGIN_EXPORT int PLUGIN_CALL AmxLoad(AMX *amx){
 	else if (args[0] == "reloadjs"){
 		if (args.size() > 1){
 			sampjs::SAMPJS::RemoveScript(args[1]);
-			sampjs::SAMPJS::CreateScript(args[1]);
+			if (sampjs::SAMPJS::CreateScript(args[1])){
+				auto script = sampjs::SAMPJS::GetScript(args[1]);
+				if (script){
+					script->Server()->FireEvent("ScriptInit");
+				}
+			}
+		}
+		return true;
+	}
+
+	else if (args[0] == "listjs"){
+		sjs::logger::log("Loaded JS Scripts:");
+		for (auto scriptv : sampjs::SAMPJS::scripts){
+			sjs::logger::log("%s", scriptv.c_str());
 		}
 		return true;
 	}
@@ -152,8 +199,9 @@ PLUGIN_EXPORT int PLUGIN_CALL AmxLoad(AMX *amx){
 }
 
 
-
+ bool first = false;
 PLUGIN_EXPORT bool PLUGIN_CALL OnPublicCall(AMX *amx, const char *name, cell *params, cell *retval){
+
 	sampjs::SAMPJS::amx = amx;
 	if (string(name) == "OnRconCommand"){
 		cell* maddr = NULL;
@@ -177,8 +225,8 @@ PLUGIN_EXPORT bool PLUGIN_CALL OnPublicCall(AMX *amx, const char *name, cell *pa
 			return true;
 		}
 	} 
-	bool ret = sampjs::SAMPJS::PublicCall(name, params, retval); 
-	return ret;
+	int ret = sampjs::SAMPJS::PublicCall(name, params, retval); 
+	return (ret > 0);
 }
 
 
@@ -198,7 +246,6 @@ PLUGIN_EXPORT int PLUGIN_CALL AmxUnload(AMX *amx){
 	} */
 	return AMX_ERR_NONE;
 } 
-
 PLUGIN_EXPORT void PLUGIN_CALL ProcessTick(){
 	sampjs::SAMPJS::ProcessTick();
 	sampgdk::ProcessTick();

@@ -12,13 +12,14 @@
 
 using namespace sampjs;
 
-AMX *SAMPJS::amx;
+AMX *SAMPJS::amx = NULL;
 AMX_HEADER *SAMPJS::amx_hdr;
 string SAMPJS::v8flags = "--expose-gc --allow_natives_syntax --harmony --harmony-modules --use_strict ";
 Platform *SAMPJS::platform;
 ArrayBufferAllocator SAMPJS::array_buffer_allocator;
 
-map<string, shared_ptr<sampjs::Script>> SAMPJS::scripts;
+vector<string> SAMPJS::scripts;
+unordered_map<string, shared_ptr<sampjs::Script>> SAMPJS::scripts_map;
 
 
 
@@ -41,10 +42,12 @@ void SAMPJS::Init(){
 }
 
 void SAMPJS::Shutdown(){
-	for (auto script : scripts){
-		script.second->Unload();
-		script.second.reset();
-		scripts.erase(script.first);
+	for (auto scriptv : scripts){
+		auto script = scripts_map[scriptv];
+		script->Unload();
+	//	script.reset();
+		//scripts.erase(std::remove(scripts.begin(), scripts.end(), scriptv), scripts.end());
+	//	scripts_map.erase(scriptv);
 	}
 
 	MySQL::StaticShutdown();
@@ -54,38 +57,64 @@ void SAMPJS::Shutdown(){
 }
 
 void SAMPJS::ProcessTick(){
-	for (auto script : scripts){
-		if(script.second->IsReady()) script.second->Tick();
+	for (auto scriptv : scripts){
+		auto script = scripts_map[scriptv];
+		if (script && script->IsReady()){
+			script->Tick();
+		}
 	}
 }
 
 
 
-void SAMPJS::CreateScript(string filename){
-	if (ScriptLoaded(filename)){
+bool SAMPJS::CreateScript(string filename){
+	if (ScriptLoaded(filename) || ScriptLoaded("js/"+filename)){
 		sjs::logger::log("Script: %s, already loaded", filename.c_str());
-		return;
+		return false;
 	}
 	filename = "js/" + filename;
-	scripts[filename] = make_shared<Script>();
-	if (!scripts[filename]->Init(filename)){
-		scripts.erase(filename);
+	scripts_map[filename] = make_shared<Script>();
+	if (!scripts_map[filename]->Init(filename)){
+		scripts_map.erase(filename);
+		//scripts.erase(std::remove(scripts.begin(), scripts.end(), filename), scripts.end());
+		return false;
 	}
+
+	scripts.push_back(filename);
+	return true;
 }
+
 
 void SAMPJS::RemoveScript(string filename){
 	if (ScriptLoaded(filename)){
-		scripts[filename]->Unload();
-		scripts.erase(filename);
+		scripts.erase(std::remove(scripts.begin(), scripts.end(), filename), scripts.end());
+		scripts_map[filename]->Unload();
+		scripts_map.erase(filename);
+		
+		sjs::logger::log("Unloaded script: %s", filename.c_str());
 	}
 	else if (ScriptLoaded("js/" + filename)){
-		scripts["js/" + filename]->Unload();
-		scripts.erase("js/" + filename);
+		scripts.erase(std::remove(scripts.begin(), scripts.end(), "js/" + filename), scripts.end());
+		scripts_map["js/" + filename]->Unload();
+		scripts_map.erase("js/" + filename);
+		
+		sjs::logger::log("Unloaded script: %s", ("js/" + filename).c_str());
+	}
+	else {
+		sjs::logger::error("Script does not exist: %s", filename.c_str());
 	}
 }
 
 bool SAMPJS::ScriptLoaded(string filename){
-	return (scripts.find(filename) != scripts.end());
+	return (scripts_map.find(filename) != scripts_map.end());
+}
+
+
+void SAMPJS::ScriptInit(){
+	for (auto scriptv : scripts){
+		auto script = scripts_map[scriptv];
+		script->Server()->FireEvent("ScriptInit");
+	}
 }
 
 void SAMPJS::SetAMX(AMX *amx){
@@ -97,6 +126,10 @@ void SAMPJS::JS_Load(const FunctionCallbackInfo<Value> & args){
 	if (args.Length() < 1)return;
 	string file = JS2STRING(args[0]);
 	CreateScript(file);
+	auto script = GetScript(file);
+	if (script != nullptr){
+		script->Server()->FireEvent("ScriptInit");
+	}
 }
 
 void SAMPJS::JS_Unload(const FunctionCallbackInfo<Value> & args){
@@ -110,15 +143,44 @@ void SAMPJS::JS_Reload(const FunctionCallbackInfo<Value> & args){
 	string file = JS2STRING(args[0]);
 	RemoveScript(file);
 	CreateScript(file);
+	auto script = GetScript(file);
+	if (script != nullptr){
+		script->Server()->FireEvent("ScriptInit");
+	}
 }
 
-bool SAMPJS::PublicCall(const char *name, cell *params, cell *retval){
+void SAMPJS::JS_GlobalEvent(const FunctionCallbackInfo<Value> &args){
+	for (auto scriptv : scripts){
+		//Isolate *isolate = script.second->GetIsolate();
+	//	Local<Context> context = Local<Context>::New(isolate, script.second->GetContext());
+		auto script = scripts_map[scriptv];
+		string name;
+		if (args.Length() > 0){
+			if (!args[0]->IsString()){
+				return;
+			}
+
+			name = JS2STRING(args[0]);
+			Local<Value> * argv = NULL;
+			int argc = args.Length() - 1;
+			if (args.Length() > 1){
+				argv = new Local<Value>[args.Length() - 1];
+				for (int i = 1; i < args.Length(); i++){
+					argv[i-1] = args[i];
+				}
+			}
+			script->Server()->FireEvent(name, argc, argv );
+		}
+	}
+}
+
+int SAMPJS::PublicCall(const char *name, cell *params, cell *retval){
 	if (Script::_publics.find(name) == Script::_publics.end()) return true;
-	for (auto script : scripts){
+	for (auto scriptv : scripts){
+		auto script = scripts_map[scriptv];
 		bool shouldReturn = false;
-		int returnval = script.second->PublicCall(name, params, shouldReturn);
-		sjs::logger::log("%s - %i", name, returnval);
-		*retval = (cell)returnval;
+		int returnval = script->PublicCall(name, params, shouldReturn);
+		if(retval != nullptr)*retval = static_cast<cell>(returnval);
 		if (shouldReturn){
 			return returnval;
 		}
@@ -175,6 +237,16 @@ Local<Value> SAMPJS::ExecuteCode(Local<Context> context, string name, string cod
 
 
 
-map<string, shared_ptr<sampjs::Script>> SAMPJS::GetScripts(){
+vector<string> SAMPJS::GetScripts(){
 	return scripts;
+}
+
+shared_ptr<sampjs::Script> SAMPJS::GetScript(string name){
+	if (!ScriptLoaded(name)){
+		if (!ScriptLoaded("js/" + name)){
+			return nullptr;
+		}
+		return scripts_map["js/" + name];
+	}
+	return scripts_map[name];
 }

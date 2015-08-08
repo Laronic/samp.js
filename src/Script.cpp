@@ -78,13 +78,15 @@ sampjs::Script::Script(){
 
 	gbl.Set("$global", gbl.get());
 
+	
+
 }
 
 bool sampjs::Script::Init(std::string filename){
 	this->filename = filename;
 	std::ifstream t(filename);
 	if (!t){
-		sjs::logger::error("Script does not exists: %s", filename.c_str());
+		sjs::logger::error("Script does not exist: %s", filename.c_str());
 		return false;
 	}
 	LoadModules();
@@ -108,7 +110,8 @@ bool sampjs::Script::Init(std::string filename){
 	
 	LoadScript(filename, isolate, ctx);
 	this->ready = true;
-	server->FireEvent("ScriptInit");
+	sjs::logger::log("Loaded script: %s", filename.c_str());
+	//server->FireEvent("ScriptInit");
 	return true;
 }
 
@@ -136,25 +139,13 @@ bool sampjs::Script::IsReady(){
 }
 
 void sampjs::Script::LoadModules(){
-	/*modules["$utils"] = make_shared<sampjs::Utils>();
-	modules["$timers"] = make_shared<sampjs::Timers>();
-	modules["$events"] = make_shared<sampjs::Events>();
-	modules["$players"] = make_shared<sampjs::Players>();
-	modules["$fs"] = make_shared<sampjs::FileSystem>();
-	modules["$io"] = make_shared<sampjs::Sockets>();
-	modules["$HTTP"] = make_shared<sampjs::HTTP>();
-	modules["$mysql"] = make_shared<sampjs::MySQL>();
-
-	this->server = make_shared<sampjs::Server>();
-	modules["$server"] = server; */
-
 	modules.push_back(make_shared<sampjs::Utils>());
 	modules.push_back(make_shared<sampjs::Timers>());
 	modules.push_back(make_shared<sampjs::Events>());
 	modules.push_back(make_shared<sampjs::Players>());
 	modules.push_back(make_shared<sampjs::FileSystem>());
 	modules.push_back(make_shared<sampjs::Sockets>());
-	modules.push_back(make_shared<sampjs::HTTP>());
+	modules.push_back(make_shared<sampjs::HTTPJS>());
 	modules.push_back(make_shared<sampjs::MySQL>());
 
 	this->server = make_shared<sampjs::Server>();
@@ -169,7 +160,7 @@ void sampjs::Script::LoadModules(){
 	TryCatch try_catch;
 	ctx->Enter();
 	for (auto module : modules){
-		sjs::logger::log("Loading Module: %s", module->Name().c_str());
+		sjs::logger::debug("Loading Module: %s", module->Name().c_str());
 		module->Init(ctx);
 	}
 
@@ -200,7 +191,6 @@ void sampjs::Script::JS_RegisterPublic(const FunctionCallbackInfo<Value> & args)
 	string event;
 	string format;
 	bool cancel = false;
-
 	name = JS2STRING(args[0]);
 	format = JS2STRING(args[1]);
 	event = JS2STRING(args[2]);
@@ -209,6 +199,8 @@ void sampjs::Script::JS_RegisterPublic(const FunctionCallbackInfo<Value> & args)
 		if (args[3]->IsBoolean()){
 			cancel = args[3]->BooleanValue();
 		}
+
+		
 	}
 	
 	
@@ -395,7 +387,7 @@ int sampjs::Script::PublicCall(string name, cell *params, bool &shouldReturn){
 	if ((retval >0) == def->cancel){
 		shouldReturn = true;
 	}
-	if (retval == -1) return !def->cancel;
+	if (retval == -1) return (!def->cancel);
 	return retval;
 }
 
@@ -423,3 +415,10 @@ void sampjs::Script::JS_SetLocale(const FunctionCallbackInfo<Value> & args){
 	}
 }
 
+Isolate *sampjs::Script::GetIsolate(){
+	return this->isolate;
+}
+
+Persistent<Context, CopyablePersistentTraits<Context>> sampjs::Script::GetContext(){
+	return this->context;
+}

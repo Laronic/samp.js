@@ -65,6 +65,7 @@ void Server::Init(Local<Context> ctx){
 	memory.Set("peak", Server::JS_PeakMemory);
 	
 	server.Set("Debug", Utils::JS_Debug);
+	server.Set("emit", SAMPJS::JS_GlobalEvent);
 
 	
 
@@ -73,7 +74,6 @@ void Server::Init(Local<Context> ctx){
 
 void Server::Shutdown(){
 	context.Reset();
-	sjs::logger::debug("Server Shutdown");
 }
 
 
@@ -126,11 +126,7 @@ void Server::JS_CallNative(const FunctionCallbackInfo<Value> & args){
 	
 		bool multi = false;
 		if ((S_oc + I_oc + F_oc) > 1) multi = true;
-	//	if (!args[args.Length() - 1]->IsArray() && multi){
-		//	sjs::logger::error("CallNative %s, you must supply an array of strings for functions with multiple references", func_name.c_str());
-	//		return;
-	//	}
-	//
+
 		unsigned int count = (format.length()), variables = 0;
 
 		cell *physAddr[6];
@@ -339,6 +335,7 @@ void Server::JS_CallNativeGDK(const FunctionCallbackInfo<Value> & args){
 	auto iter = _gdk_native_funcs.find(name);
 	if (iter != _gdk_native_funcs.end()) native = iter->second;
 	else {
+		sjs::logger::log("Searching for native: %s", name);
 		native = sampgdk::FindNative(name);
 		if (!native){
 			sjs::logger::error("Native function: %s, not found.", name);
@@ -360,8 +357,8 @@ void Server::JS_CallNativeGDK(const FunctionCallbackInfo<Value> & args){
 	int strs = 0;
 	int strv = 0;
 	size_t len = strlen(format);
-	std::string format_str;
 
+	char str_format[256]{'\0'};
 	for (unsigned int i = 0; i < len; i++){
 		switch (format[i]){
 		case 'i':
@@ -369,19 +366,18 @@ void Server::JS_CallNativeGDK(const FunctionCallbackInfo<Value> & args){
 				param_value[i] = args[k]->Int32Value();
 				params[j++] = static_cast<void*>(&param_value[i]);
 				k++;
-				format_str += format[i];
-			
+				sprintf(str_format, "%si", str_format);
 			}
 			break;
 		case 'f':
 			{
 				float val = 0.0;
-				if (!args[k]->IsUndefined()) val = args[k]->NumberValue();
+				if (!args[k]->IsUndefined()) val = static_cast<float>(args[k]->NumberValue());
 
 				param_value[i] = amx_ftoc(val);
 				params[j++] = static_cast<void*>(&param_value[i]);
 				k++;
-				format_str += format[i];
+				sprintf(str_format, "%sf", str_format);
 			}
 			break;
 		case 's':
@@ -392,16 +388,15 @@ void Server::JS_CallNativeGDK(const FunctionCallbackInfo<Value> & args){
 				//param_str.push_back(new char[slen + 1]);
 				//wcstombs(param_str.back(), wstr, slen+1);
 				const char* str = ToCString(jstring);
-
 				char* mystr = new char[slen + 1];
-				for (int x = 0; x < slen; x++){
+				for (size_t x = 0; x < slen; x++){
 					mystr[x] = str[x];
 				}
 				mystr[slen] = '\0';
 				params[j] = static_cast<void*>(mystr);
 				j++;
 				k++;
-				format_str += format[i];
+				sprintf(str_format, "%ss", str_format);
 				strs++;
 			}
 			break;
@@ -420,15 +415,10 @@ void Server::JS_CallNativeGDK(const FunctionCallbackInfo<Value> & args){
 
 				cell *value = new cell[size];
 
-				for (int b = 0; b < size; b++){
+				for (size_t b = 0; b < size; b++){
 					value[b] = a->Get(b)->Int32Value();
 				}
-
-
-				char buffer[10];
-				int sz = sprintf(buffer, "a[%i]", size);
-				buffer[sz] = '\0';
-				format_str += string(buffer);
+				sprintf(str_format, "%sa[%i]", str_format, size);
 				params[j++] = static_cast<void*>(value);
 				strs++;
 				
@@ -447,15 +437,12 @@ void Server::JS_CallNativeGDK(const FunctionCallbackInfo<Value> & args){
 
 				cell *value = new cell[size];
 
-				for (int b = 0; b < size; b++){
-					float val = a->Get(b)->NumberValue();
+				for (size_t b = 0; b < size; b++){
+					float val = static_cast<float>(a->Get(b)->NumberValue());
 					value[b] = amx_ftoc(val);
 					
 				}
-				char buffer[10];
-				int sz = sprintf(buffer, "a[%i]",size);
-				buffer[sz] = '\0';
-				format_str += string(buffer);
+				sprintf(str_format, "%sa[%i]", str_format, size);
 				params[j++] = static_cast<void*>(value);
 				strs++;
 
@@ -466,7 +453,7 @@ void Server::JS_CallNativeGDK(const FunctionCallbackInfo<Value> & args){
 			{
 				vars++;
 				params[j++] = static_cast<void*>(&param_value[i]);
-				format_str += 'R';
+				sprintf(str_format, "%sR", str_format);
 			}
 			break;
 
@@ -479,10 +466,7 @@ void Server::JS_CallNativeGDK(const FunctionCallbackInfo<Value> & args){
 					value[c] = 0;
 				}
 				params[j++] = static_cast<void*>(value);
-				char buffer[10];
-				int bsize = sprintf(buffer, "A[%i]", size);
-				buffer[bsize] = '\0';
-				format_str += string(buffer);
+				sprintf(str_format, "%sA[%i]", str_format, size);
 				vars++;
 			}
 			break;
@@ -498,25 +482,26 @@ void Server::JS_CallNativeGDK(const FunctionCallbackInfo<Value> & args){
 				}
 
 				params[j++] = static_cast<void*>(value);
-				char buffer[10];
-				int bsize = sprintf(buffer, "A[%i]", size);
-				buffer[bsize] = '\0';
-				format_str += string(buffer);
-				//sjs::logger::log("%s", buffer);
+				sprintf(str_format, "%sA[%i]", str_format, size);
 				vars++;
 			}
 			break;
 		case 'S':
 			{
 
-				const int strlen = args[k++]->Int32Value();
+				const unsigned int strlen = args[k++]->Int32Value();
 				param_size[j] = strlen;
-			
-				char buffer[10];
-				int size = sprintf(buffer, "S[%i]", strlen);
-				buffer[size] = '\0';
-				format_str += string(buffer);
-				char* mycell = new char[strlen + 1]{'\0'};
+				
+				if (strlen < 1){
+					sjs::logger::error("CallNativeGDK: %s - String length can't be 0", name);
+					return;
+				}
+
+				sprintf(str_format, "%sS[%i]", str_format, strlen);
+				cell* mycell = new cell[strlen]{'\0'};
+				for (size_t x = 0; x < strlen; x++){
+					mycell[x] = '\0';
+				}
 				params[j++] = static_cast<void*>(mycell);
 				vars++;
 				i++;
@@ -525,9 +510,8 @@ void Server::JS_CallNativeGDK(const FunctionCallbackInfo<Value> & args){
 	
 		}
 	}	
-	int retval = sampgdk::InvokeNativeArray(native, format_str.c_str(), params);
+	int retval = sampgdk::InvokeNativeArray(native, str_format, params);
 
-	
 	if (vars > 0 || strs > 0){
 		Local<Array> arr = Array::New(args.GetIsolate(), vars);
 		j = 0;
@@ -542,11 +526,6 @@ void Server::JS_CallNativeGDK(const FunctionCallbackInfo<Value> & args){
 				}
 				break;
 			case 's':
-				{
-					delete[] params[j++];
-					
-				}
-				break;
 			case 'a':
 			case 'v':
 				{
@@ -595,8 +574,6 @@ void Server::JS_CallNativeGDK(const FunctionCallbackInfo<Value> & args){
 			case 'S':
 				{
 
-					
-					size_t slen = strlen(static_cast<char*>(params[j]));
 					char* str = static_cast<char*>(params[j]);
 					arr->Set(vars++, String::NewFromUtf8(args.GetIsolate(), str));
 					i++;
@@ -756,6 +733,8 @@ int Server::FireNative(std::string name, std::string param_types, std::vector<st
 					else {
 						auto getPlayer = Local<Function>::Cast(players.getValue("getPlayer"));
 						Local<Value> argv[1] = { Integer::New(isolate, playerid) };
+
+					
 						player = getPlayer->Call(players.get(), 1, argv);
 						if (trycatch.HasCaught()){
 							Utils::PrintException(&trycatch);
@@ -778,13 +757,13 @@ int Server::FireNative(std::string name, std::string param_types, std::vector<st
 			}
 		}
 		Local<Value> ret = firefn->Call(server.get(), argc, argv);
-		delete[] argv;
+		if(argc > 0) delete[] argv;
 		int retval = 1;
 		if (try_catch.HasCaught()){
 			Utils::PrintException(&try_catch);
 		}
 		else {
-			if (ret->IsNumber()) retval = ret->Int32Value();
+			if (ret->IsNumber() || ret->IsBoolean()) retval = ret->Int32Value();
 		}
 		return retval;
 	}
